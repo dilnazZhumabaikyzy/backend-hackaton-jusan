@@ -37,6 +37,7 @@ public class MailServiceImpl {
 
     public void sendSantaMessage(String santaEmail, Card nextCard) {
         String emailBody = "Hi, dear participant. Now you are going to know who is your receiver: " + nextCard.getOwner().getFullName()
+                + "\nThe email address of your receiver: " + nextCard.getOwner().getEmail()
                 + "\n" + "Here you can see the wish list of your receiver: " + processGiftList(nextCard.getGifts());
         sendSimpleMessage(santaEmail, "Secret Santa Results", emailBody);
     }
@@ -44,7 +45,7 @@ public class MailServiceImpl {
     private String processGiftList(List<Gift> gifts) {
         String giftsString = "";
         for (int i =  0; i < gifts.size(); i++){
-            giftsString += i + ". " + gifts.get(i).getDescription() +"\n";
+            giftsString += i+1 + ". " + gifts.get(i).getDescription() +"\n";
         }
 
         return giftsString;

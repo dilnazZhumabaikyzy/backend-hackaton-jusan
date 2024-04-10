@@ -1,6 +1,8 @@
 package com.example.backend.auth;
 
 import com.example.backend.config.JwtService;
+import com.example.backend.exception.DuplicateKeyException;
+import com.example.backend.exception.IncorrectPasswordException;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +10,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+
 import java.security.SecureRandom;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +22,11 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationResponse register(RegisterRequest request) throws DuplicateKeyException {
+
+            if(userRepository.existsByEmail(request.getEmail())){
+                throw new DuplicateKeyException("Such email already exists");
+            }
            var user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -29,6 +38,13 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        if(!userRepository.existsByEmail(request.getEmail())) {
+            throw new IncorrectPasswordException("Such email does not exist");
+        }
+        String currentPassword = userRepository.getUserByEmail(request.getEmail()).getPassword();
+        if(!passwordEncoder.matches(request.getPassword(), currentPassword)){
+            throw new IncorrectPasswordException("Вы ввели неправильный пароль, попробуйте еще раз");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),

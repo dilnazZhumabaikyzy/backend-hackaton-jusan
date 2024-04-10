@@ -3,17 +3,15 @@ package com.example.backend.auth;
 import com.example.backend.dto.RequestDto;
 import com.example.backend.service.impl.MailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 @RestController
 @RequestMapping("auth")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final MailServiceImpl mailService;
+
     @Autowired
     public AuthenticationController(AuthenticationService authenticationService, MailServiceImpl mailService) {
         this.authenticationService = authenticationService;

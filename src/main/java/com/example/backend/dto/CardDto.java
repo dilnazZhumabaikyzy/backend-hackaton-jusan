@@ -28,5 +28,16 @@ public class CardDto {
         this.id = card.getId();
         this.owner_id = card.getOwner().getId();
         this.event_id = card.getEvent().getId();
+        if(card.getGifts() != null){
+            this.gifts = transformGiftListToDto(card.getGifts());
+        }
+    }
+
+    private List<GiftDto> transformGiftListToDto(List<Gift> gifts) {
+        List<GiftDto> giftDtoList = new ArrayList<>();
+        for(Gift gift : gifts){
+            giftDtoList.add(new GiftDto(gift));
+        }
+        return giftDtoList;
     }
 }

@@ -20,12 +20,15 @@ import java.util.List;
 @Table(name = "event")
 public class Event {
     @Id
+    @Column(nullable = false)
     private String id;
     private String name;
     @CreationTimestamp
     private LocalDateTime createdAt;
     private Boolean isLimitSet;
     private int price;
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
