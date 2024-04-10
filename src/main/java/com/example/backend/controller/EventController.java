@@ -30,12 +30,12 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.createCard(card, authentication));
     }
 
-    @PostMapping("/shuffle")
+    @PostMapping("/shuffle/{eventId}")
     public ResponseEntity<ShuffleDto> shuffleCards(@PathVariable String eventId, Authentication authentication){
         return ResponseEntity.ok().body(eventService.shuffle(eventId, authentication));
     }
 
-    @GetMapping("/myreceiver")
+    @GetMapping("/myreceiver/{eventId}")
     public ResponseEntity<ShuffleDto> getMyReceiver(@PathVariable String eventId, Authentication authentication){
         return ResponseEntity.ok().body(eventService.showMyReceiver(eventId, authentication));
     }
