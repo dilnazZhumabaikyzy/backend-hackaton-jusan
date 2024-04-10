@@ -1,16 +1,15 @@
 package com.example.backend.service.impl;
 
 import com.example.backend.dto.*;
+import com.example.backend.exception.DuplicateKeyException;
+import com.example.backend.exception.InvalidEventException;
 import com.example.backend.model.*;
 import com.example.backend.repository.*;
 import com.example.backend.service.CardService;
 import com.example.backend.service.EventService;
-import com.example.backend.service.MailService;
 import com.example.backend.util.AuthenticationUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -37,66 +36,70 @@ public class EventServiceImpl implements EventService {
         Event event = new Event();
         event.setName(eventDTO.getName());
         String eventID = eventDTO.getIdentificator();
-//        if (eventID == null || eventID.isEmpty()) {
-//            eventID = generateUniqueId();
-//        }
-
-        if (!isIdUnique(eventDTO.getIdentificator())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).
-//                    body("This id is already exists in system. Please write another id");
+        if (eventID.trim().equals("")) {
+            throw new NullPointerException("Идентификатор не должен быть пустым");
         }
-
+        if (!isIdUnique(eventDTO.getIdentificator())) {
+            throw new DuplicateKeyException("Игра с таким идентификатором существует. Попробуйте другое название");
+        }
         event.setId(eventID);
 
         LocalDateTime currentTime = LocalDateTime.now();
         event.setCreatedAt(currentTime);
         if (eventDTO.getIsLimited()) {
-            event.setPrice(eventDTO.getPrice());
+            if (eventDTO.getPrice() > 0) {
+                event.setPrice(eventDTO.getPrice());
+            } else {
+                throw new IllegalArgumentException("Укажите лимит больше 0");
+            }
+            event.setCurrency(eventDTO.getCurrencyType());
         }
         event.setIsLimitSet(eventDTO.getIsLimited());
-//        User user = userRepository.findUserByFullName(name);
         User user = getUser(authentication);
         event.setOwner(user);
         eventRepository.save(event);
         return new EventDto(event);
-//        return ResponseEntity.status(HttpStatus.OK).body("Event created successfully!");
-
     }
 
     @Override
     public List<EventDto> getAllEvents(Authentication authentication) {
+        Set<EventDto> eventDtoHashSet = new HashSet<>();
+
         User user = getUser(authentication);
-        List<CardDto> cardList = cardService.getCards(user.getId());
+
         List<EventDto> eventDtoList = new ArrayList<>();
+        List<CardDto> cardList = cardService.getCards(user);
+
         List<Event> myEvents = eventRepository.findEventsByOwner(user);
         List<EventDto> myEventDtos = transformToDto(myEvents);
-        if(cardList != null){
+
+        if (cardList != null) {
             for (CardDto cardDto : cardList) {
                 Event tempEvent = eventRepository.findById(cardDto.getEvent_id()).orElseThrow();
                 EventDto eventDto = new EventDto(tempEvent);
-                eventDtoList.add(eventDto);
+                eventDtoHashSet.add(eventDto);
             }
         }
 
-        if(myEventDtos != null){
-            for (EventDto eventDto : myEventDtos) {
-                eventDtoList.add(eventDto);
-            }
+        if (myEventDtos != null) {
+            eventDtoHashSet.addAll(myEventDtos);
         }
-
+        eventDtoList.addAll(eventDtoHashSet);
         return eventDtoList;
     }
 
+
     @Override
     public CardDto createCard(CardDto cardDto, Authentication authentication) {
-        Event event = eventRepository.findById(cardDto.getEvent_id()).orElseThrow();
+        Event event = eventRepository.findById(cardDto.getEvent_id()).
+                orElseThrow(() -> new InvalidEventException(cardDto.getEvent_id()));
         List<Card> cardList = event.getCards();
-        User  owner = authenticationUtils.getUser(authentication);
+        User owner = authenticationUtils.getUser(authentication);
         Card card = Card.builder().event(event).owner(owner).build();
         cardRepository.save(card);
         List<GiftDto> giftDtos = cardDto.getGifts();
-        List<Gift> giftList  =  new ArrayList<>();
-        for(GiftDto giftDto: giftDtos){
+        List<Gift> giftList = new ArrayList<>();
+        for (GiftDto giftDto : giftDtos) {
             Gift gift = Gift.builder()
                     .card(card)
                     .description(giftDto.getDescription())
@@ -146,8 +149,11 @@ public class EventServiceImpl implements EventService {
         return user;
     }
 
-    public ShuffleDto shuffle(String eventId, Authentication authentication){
+    public ShuffleDto shuffle(String eventId, Authentication authentication) {
         User user = getUser(authentication);
+        if (!eventRepository.existsById(eventId)) {
+            throw new InvalidEventException(eventId);
+        }
         Event event = eventRepository.findEventById(eventId);
 
         List<SantaDto> santaDtoList = new ArrayList<>();
@@ -156,19 +162,19 @@ public class EventServiceImpl implements EventService {
         List<Card> cardList = event.getCards();
         Collections.shuffle(cardList);
 
-        for(int i = 0; i < cardList.size(); i++){
+        for (int i = 0; i < cardList.size(); i++) {
             Card currentCard = cardList.get(i);
-            Card nextCard = cardList.get((i+1)%cardList.size());
+            Card nextCard = cardList.get((i + 1) % cardList.size());
 
 
             SantaDto santaDto = new SantaDto(currentCard, nextCard);
 
-            if(currentCard.getOwner() == user){
-                 shuffleDto = ShuffleDto.builder()
-                         .receiverEmail(santaDto.getReceiverEmail())
-                         .receiverName(santaDto.getReceiverName())
-                         .receiverGiftList(transformToGiftDto(nextCard.getGifts()))
-                         .build();
+            if (currentCard.getOwner() == user) {
+                shuffleDto = ShuffleDto.builder()
+                        .receiverEmail(santaDto.getReceiverEmail())
+                        .receiverName(santaDto.getReceiverName())
+                        .receiverGiftList(transformToGiftDto(nextCard.getGifts()))
+                        .build();
             }
 
 
@@ -178,7 +184,6 @@ public class EventServiceImpl implements EventService {
 
             mailService.sendSantaMessage(santaDto.getSantaEmail(), nextCard);
         }
-
 
 
         return shuffleDto;
@@ -192,9 +197,12 @@ public class EventServiceImpl implements EventService {
         return giftDtoList;
     }
 
-    public ShuffleDto showMyReceiver(String evenId, Authentication authentication){
+    public ShuffleDto showMyReceiver(String eventId, Authentication authentication) {
         User user = getUser(authentication);
-        Event event = eventRepository.findEventById(evenId);
+        if (!eventRepository.existsById(eventId)) {
+            throw new InvalidEventException(eventId);
+        }
+        Event event = eventRepository.findEventById(eventId);
         Santa santa = santaRepository.getSantaBySantaUserAndEvent_Id(user, event.getId());
 
         Card card = cardRepository.getCardByOwnerAndEvent(santa.getReceiverUser(), event);
