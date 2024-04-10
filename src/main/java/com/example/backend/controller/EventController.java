@@ -36,7 +36,7 @@ public class EventController {
 
     @Transactional
     @PostMapping("/shuffle/{eventId}")
-    public ResponseEntity<ShuffleDto> shuffleCards(@PathVariable String eventId, Authentication authentication) {
+    public ResponseEntity<ShuffleDto> shuffleCards(@PathVariable String eventId, Authentication authentication){
         return ResponseEntity.ok().body(eventService.shuffle(eventId, authentication));
     }
 
