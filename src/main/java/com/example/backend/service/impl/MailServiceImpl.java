@@ -1,8 +1,12 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.model.Card;
+import com.example.backend.model.Gift;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MailServiceImpl {
@@ -29,5 +33,20 @@ public class MailServiceImpl {
                 "Thank you.\n\n" +
                 "Secret Santa Inc";
         sendSimpleMessage(email, "A new password for your Secret Santa account", emailBody);
+    }
+
+    public void sendSantaMessage(String santaEmail, Card nextCard) {
+        String emailBody = "Hi, dear participant. Now you are going to know who is your receiver: " + nextCard.getOwner().getFullName()
+                + "\n" + "Here you can see the wish list of your receiver: " + processGiftList(nextCard.getGifts());
+        sendSimpleMessage(santaEmail, "Secret Santa Results", emailBody);
+    }
+
+    private String processGiftList(List<Gift> gifts) {
+        String giftsString = "";
+        for (int i =  0; i < gifts.size(); i++){
+            giftsString += i + ". " + gifts.get(i).getDescription() +"\n";
+        }
+
+        return giftsString;
     }
 }

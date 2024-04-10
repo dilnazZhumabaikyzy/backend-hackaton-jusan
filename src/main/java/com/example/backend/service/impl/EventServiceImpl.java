@@ -37,9 +37,9 @@ public class EventServiceImpl implements EventService {
         Event event = new Event();
         event.setName(eventDTO.getName());
         String eventID = eventDTO.getIdentificator();
-        if (eventID == null || eventID.isEmpty()) {
-            eventID = generateUniqueId();
-        }
+//        if (eventID == null || eventID.isEmpty()) {
+//            eventID = generateUniqueId();
+//        }
 
         if (!isIdUnique(eventDTO.getIdentificator())) {
 //            return ResponseEntity.status(HttpStatus.BAD_REQUEST).
@@ -146,37 +146,42 @@ public class EventServiceImpl implements EventService {
         return user;
     }
 
-    public SantaDto shuffle(ShuffleDto dto, Authentication authentication){
+    public ShuffleDto shuffle(String eventId, Authentication authentication){
         User user = getUser(authentication);
-        Event event = eventRepository.findEventById(dto.getId());
+        Event event = eventRepository.findEventById(eventId);
+
+        List<SantaDto> santaDtoList = new ArrayList<>();
+        ShuffleDto shuffleDto = new ShuffleDto();
+
         List<Card> cardList = event.getCards();
         Collections.shuffle(cardList);
-        List<SantaDto> santaDtoList = new ArrayList<>();
-        SantaDto response = new SantaDto();
+
         for(int i = 0; i < cardList.size(); i++){
             Card currentCard = cardList.get(i);
             Card nextCard = cardList.get((i+1)%cardList.size());
-            List<GiftDto> giftDtoList = transformToGiftDto(nextCard.getGifts());
+
+
+            SantaDto santaDto = new SantaDto(currentCard, nextCard);
+
             if(currentCard.getOwner() == user){
-                 response = new SantaDto(currentCard.getOwner().getFullName(), nextCard.getOwner().getFullName(),
-                         currentCard.getOwner().getEmail(), nextCard.getOwner().getEmail(), giftDtoList);
+                 shuffleDto = ShuffleDto.builder()
+                         .receiverEmail(santaDto.getReceiverEmail())
+                         .receiverName(santaDto.getReceiverName())
+                         .receiverGiftList(transformToGiftDto(nextCard.getGifts()))
+                         .build();
             }
-            SantaDto santaDto = new SantaDto(currentCard.getOwner().getFullName(), nextCard.getOwner().getFullName(),
-                    currentCard.getOwner().getEmail(),nextCard.getOwner().getEmail(),giftDtoList);
-            User user1 = userRepository.getUserById(currentCard.getOwner().getId());
-            User user2 = userRepository.getUserById(nextCard.getOwner().getId());
-            Santa santa = new Santa(event, user1, user2);
+
+
+            Santa santa = new Santa(event, currentCard.getOwner(), nextCard.getOwner());
             santaRepository.save(santa);
-            santaDtoList.add(santaDto);
+
+
+            mailService.sendSantaMessage(santaDto.getSantaEmail(), nextCard);
         }
 
-        for(SantaDto santaDto : santaDtoList){
-            String body = "Hi, dear participant. Now you are going to know who is your receiver: " + santaDto.getReceiverName()
-                    + "\n" + "Here you can see the wish list of your receiver: " + santaDto.getGifts();
-            mailService.sendSimpleMessage(santaDto.getSantaEmail(), "Please welcome your receiver", body);
-        }
 
-        return response;
+
+        return shuffleDto;
     }
 
     public List<GiftDto> transformToGiftDto(List<Gift> giftList) {
@@ -187,14 +192,21 @@ public class EventServiceImpl implements EventService {
         return giftDtoList;
     }
 
-    public SantaDto showMyReceiver(String evenId, Authentication authentication){
+    public ShuffleDto showMyReceiver(String evenId, Authentication authentication){
         User user = getUser(authentication);
         Event event = eventRepository.findEventById(evenId);
         Santa santa = santaRepository.getSantaBySantaUserAndEvent_Id(user, event.getId());
+
         Card card = cardRepository.getCardByOwnerAndEvent(santa.getReceiverUser(), event);
         List<GiftDto> giftDtoList = transformToGiftDto(card.getGifts());
-        SantaDto santaDto = new SantaDto(santa.getReceiverUser().getFullName(),
-                santa.getReceiverUser().getEmail(), giftDtoList);
-        return santaDto;
+
+
+        ShuffleDto shuffleDto = ShuffleDto.builder()
+                .receiverEmail(santa.getReceiverUser().getEmail())
+                .receiverName(santa.getReceiverUser().getFullName())
+                .receiverGiftList(giftDtoList)
+                .build();
+
+        return shuffleDto;
     }
 }

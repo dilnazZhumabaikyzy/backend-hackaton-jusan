@@ -18,11 +18,19 @@ public class SantaDto {
     private String receiverName;
     private String santaEmail;
     private String receiverEmail;
-    private List<GiftDto> gifts;
 
-    public SantaDto(String receiverName, String receiverEmail, List<GiftDto> gifts) {
+
+    public SantaDto(String receiverName, String receiverEmail) {
         this.receiverName = receiverName;
         this.receiverEmail = receiverEmail;
-        this.gifts = gifts;
+
+    }
+
+    public SantaDto(Card currentCard, Card nextCard) {
+        this.santaName = currentCard.getOwner().getFullName();
+        this.santaEmail = currentCard.getOwner().getEmail();
+
+        this.receiverName = nextCard.getOwner().getFullName();
+        this.receiverEmail = nextCard.getOwner().getEmail();
     }
 }

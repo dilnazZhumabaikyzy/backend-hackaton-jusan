@@ -27,7 +27,6 @@ public class User implements UserDetails {
     private Long id;
     @Column(name = "full_name")
     private  String fullName;
-    @Column(unique = true)
     private String email;
     @JsonIgnore
     private String password;
@@ -35,7 +34,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "image_id")
     private ImageData imageData;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner")
     List<Card> cards = new ArrayList<>();
 
     @OneToMany(mappedBy = "santaUser")

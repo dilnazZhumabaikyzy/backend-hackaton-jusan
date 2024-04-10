@@ -12,7 +12,7 @@ public interface EventService {
     List<EventDto> getAllEvents(Authentication authentication);
 
     CardDto createCard(CardDto card, Authentication authentication);
-    SantaDto shuffle(ShuffleDto dto, Authentication authentication);
+    ShuffleDto shuffle(String eventId, Authentication authentication);
 
-    SantaDto showMyReceiver(String eventId, Authentication authentication);
+    ShuffleDto showMyReceiver(String eventId, Authentication authentication);
 }
