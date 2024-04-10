@@ -1,5 +1,6 @@
 package com.example.backend.service.impl;
 
+import com.example.backend.dto.RequestDto;
 import com.example.backend.dto.UserDto;
 import com.example.backend.model.ImageData;
 import com.example.backend.model.User;
@@ -82,10 +83,10 @@ public class UserServiceImpl {
         return new UserDto(user);
     }
 
-    public UserDto updatePassword(String newPassword, Authentication authentication) {
+    public UserDto updatePassword(RequestDto requestDto, Authentication authentication) {
         User user = getUser(authentication);
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         userRepository.save(user);
 
         return new UserDto(user);

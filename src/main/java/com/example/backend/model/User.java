@@ -35,7 +35,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "image_id")
     private ImageData imageData;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     List<Card> cards = new ArrayList<>();
 
     @OneToMany(mappedBy = "santaUser")

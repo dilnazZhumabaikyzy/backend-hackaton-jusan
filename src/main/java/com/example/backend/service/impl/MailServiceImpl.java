@@ -23,11 +23,11 @@ public class MailServiceImpl {
         emailSender.send(message);
     }
     public void sendRecoveryMail(String password, String email) {
-        String emailBody = "Ваш пароль был сброшен. Новый пароль: "+password+"\n\n" +
-                "После входа в систему, пожалуйста, смените его для безопасности вашей учетной записи.\n\n" +
-                "Если это действие не было выполнено вами, обратитесь в службу поддержки.\n\n" +
-                "Спасибо.\n\n" +
+        String emailBody = "Your password has been reset. New password: "+password+"\n\n" +
+                "After logging in, please change it for the security of your account.\n\n" +
+                "If this action has not been performed by you, contact customer support.\n\n" +
+                "Thank you.\n\n" +
                 "Secret Santa Inc";
-        sendSimpleMessage(email, "Новый пароль для вашей учетной записи Secret Santa", emailBody);
+        sendSimpleMessage(email, "A new password for your Secret Santa account", emailBody);
     }
 }

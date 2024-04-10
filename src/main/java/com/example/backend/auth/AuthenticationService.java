@@ -18,13 +18,20 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     public AuthenticationResponse register(RegisterRequest request) {
+        if(userRepository.existsByEmail(request.getEmail())){
+//            throw new EmailAlreadyExists("This email is already registered. Please use another email");
+            String response = "try again";
+            return AuthenticationResponse.builder().token(response).build();
+        }
         var user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+
+            userRepository.save(user);
+            var jwtToken = jwtService.generateToken(user);
+            return AuthenticationResponse.builder().token(jwtToken).build();
+
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {

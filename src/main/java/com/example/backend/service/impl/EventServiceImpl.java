@@ -1,29 +1,22 @@
 package com.example.backend.service.impl;
 
-import com.example.backend.dto.CardDto;
-import com.example.backend.dto.EventDto;
-import com.example.backend.dto.GiftDto;
-import com.example.backend.model.Card;
-import com.example.backend.model.Event;
-import com.example.backend.model.Gift;
-import com.example.backend.model.User;
-import com.example.backend.repository.CardRepository;
-import com.example.backend.repository.EventRepository;
-import com.example.backend.repository.GiftRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.dto.*;
+import com.example.backend.model.*;
+import com.example.backend.repository.*;
 import com.example.backend.service.CardService;
 import com.example.backend.service.EventService;
+import com.example.backend.service.MailService;
 import com.example.backend.util.AuthenticationUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +28,8 @@ public class EventServiceImpl implements EventService {
     private final GiftRepository giftRepository;
     private final AuthenticationUtils authenticationUtils;
     private final CardService cardService;
+    private final SantaRepository santaRepository;
+    private final MailServiceImpl mailService;
     private int count = 0;
 
     @Override
@@ -95,6 +90,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public CardDto createCard(CardDto cardDto, Authentication authentication) {
         Event event = eventRepository.findById(cardDto.getEvent_id()).orElseThrow();
+        List<Card> cardList = event.getCards();
         User  owner = authenticationUtils.getUser(authentication);
         Card card = Card.builder().event(event).owner(owner).build();
         cardRepository.save(card);
@@ -110,7 +106,10 @@ public class EventServiceImpl implements EventService {
             giftList.add(gift);
         }
         card.setGifts(giftList);
+        cardList.add(card);
+        event.setCards(cardList);
         cardRepository.save(card);
+        eventRepository.save(event);
         return new CardDto(card);
     }
 
@@ -147,4 +146,55 @@ public class EventServiceImpl implements EventService {
         return user;
     }
 
+    public SantaDto shuffle(ShuffleDto dto, Authentication authentication){
+        User user = getUser(authentication);
+        Event event = eventRepository.findEventById(dto.getId());
+        List<Card> cardList = event.getCards();
+        Collections.shuffle(cardList);
+        List<SantaDto> santaDtoList = new ArrayList<>();
+        SantaDto response = new SantaDto();
+        for(int i = 0; i < cardList.size(); i++){
+            Card currentCard = cardList.get(i);
+            Card nextCard = cardList.get((i+1)%cardList.size());
+            List<GiftDto> giftDtoList = transformToGiftDto(nextCard.getGifts());
+            if(currentCard.getOwner() == user){
+                 response = new SantaDto(currentCard.getOwner().getFullName(), nextCard.getOwner().getFullName(),
+                         currentCard.getOwner().getEmail(), nextCard.getOwner().getEmail(), giftDtoList);
+            }
+            SantaDto santaDto = new SantaDto(currentCard.getOwner().getFullName(), nextCard.getOwner().getFullName(),
+                    currentCard.getOwner().getEmail(),nextCard.getOwner().getEmail(),giftDtoList);
+            User user1 = userRepository.getUserById(currentCard.getOwner().getId());
+            User user2 = userRepository.getUserById(nextCard.getOwner().getId());
+            Santa santa = new Santa(event, user1, user2);
+            santaRepository.save(santa);
+            santaDtoList.add(santaDto);
+        }
+
+        for(SantaDto santaDto : santaDtoList){
+            String body = "Hi, dear participant. Now you are going to know who is your receiver: " + santaDto.getReceiverName()
+                    + "\n" + "Here you can see the wish list of your receiver: " + santaDto.getGifts();
+            mailService.sendSimpleMessage(santaDto.getSantaEmail(), "Please welcome your receiver", body);
+        }
+
+        return response;
+    }
+
+    public List<GiftDto> transformToGiftDto(List<Gift> giftList) {
+        List<GiftDto> giftDtoList = new ArrayList<>();
+        for (Gift gift : giftList) {
+            giftDtoList.add(new GiftDto(gift));
+        }
+        return giftDtoList;
+    }
+
+    public SantaDto showMyReceiver(String evenId, Authentication authentication){
+        User user = getUser(authentication);
+        Event event = eventRepository.findEventById(evenId);
+        Santa santa = santaRepository.getSantaBySantaUserAndEvent_Id(user, event.getId());
+        Card card = cardRepository.getCardByOwnerAndEvent(santa.getReceiverUser(), event);
+        List<GiftDto> giftDtoList = transformToGiftDto(card.getGifts());
+        SantaDto santaDto = new SantaDto(santa.getReceiverUser().getFullName(),
+                santa.getReceiverUser().getEmail(), giftDtoList);
+        return santaDto;
+    }
 }

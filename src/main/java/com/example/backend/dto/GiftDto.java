@@ -1,9 +1,11 @@
 package com.example.backend.dto;
 
 import com.example.backend.model.Gift;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class GiftDto {
     private String description;
     private Long card_id;

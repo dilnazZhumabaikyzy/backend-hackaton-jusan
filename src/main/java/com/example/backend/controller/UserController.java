@@ -1,4 +1,5 @@
 package com.example.backend.controller;
+import com.example.backend.dto.RequestDto;
 import com.example.backend.dto.UserDto;
 import com.example.backend.service.impl.UserServiceImpl;
 import jakarta.transaction.Transactional;
@@ -54,8 +55,8 @@ public class UserController {
         return  ResponseEntity.ok().body(userService.updateGeneralData(updateUser, authentication));
     }
     @PutMapping("/update/password")
-    public ResponseEntity<UserDto> updateUserInfo(@RequestBody String newPassword, Authentication authentication){
-        return  ResponseEntity.ok().body(userService.updatePassword(newPassword, authentication));
+    public ResponseEntity<UserDto> updateUserInfo(@RequestBody RequestDto requestDto, Authentication authentication){
+        return  ResponseEntity.ok().body(userService.updatePassword(requestDto, authentication));
     }
 
 }

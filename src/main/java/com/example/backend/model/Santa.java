@@ -1,10 +1,7 @@
 package com.example.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -33,4 +30,11 @@ public class Santa {
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private User receiverUser;
+
+
+    public Santa(Event event, User user1, User user2) {
+        this.event = event;
+        this.santaUser = user1;
+        this.receiverUser = user2;
+    }
 }
