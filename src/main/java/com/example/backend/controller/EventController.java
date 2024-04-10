@@ -31,12 +31,12 @@ public class EventController {
     }
 
     @PostMapping("/shuffle")
-    public ResponseEntity<ShuffleDto> shuffleCards(@PathVariable("eventId") String eventId, Authentication authentication){
+    public ResponseEntity<ShuffleDto> shuffleCards(@PathVariable String eventId, Authentication authentication){
         return ResponseEntity.ok().body(eventService.shuffle(eventId, authentication));
     }
 
     @GetMapping("/myreceiver")
-    public ResponseEntity<ShuffleDto> getMyReceiver(@PathVariable("eventId") String eventId, Authentication authentication){
+    public ResponseEntity<ShuffleDto> getMyReceiver(@PathVariable String eventId, Authentication authentication){
         return ResponseEntity.ok().body(eventService.showMyReceiver(eventId, authentication));
     }
 
