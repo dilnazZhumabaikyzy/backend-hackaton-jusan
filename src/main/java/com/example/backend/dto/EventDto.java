@@ -15,7 +15,7 @@ public class EventDto {
     private String identificator;
     private Boolean isLimited;
     private int price;
-    private String currencyType;
+    private CurrencyType currencyType;
 
     public EventDto(Event event) {
         this.name = event.getName();
@@ -26,6 +26,6 @@ public class EventDto {
         this.identificator = event.getId();
         this.isLimited = event.getIsLimitSet();
         this.price = event.getPrice();
-        this.currencyType = event.getCurrency().toString();
+        this.currencyType = event.getCurrency();
     }
 }

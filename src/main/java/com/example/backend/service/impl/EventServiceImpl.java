@@ -36,7 +36,7 @@ public class EventServiceImpl implements EventService {
         Event event = new Event();
         event.setName(eventDTO.getName());
         String eventID = eventDTO.getIdentificator();
-        if(eventID.trim().equals("")){
+        if (eventID.trim().equals("")) {
             throw new NullPointerException("Идентификатор не должен быть пустым");
         }
         if (!isIdUnique(eventDTO.getIdentificator())) {
@@ -47,13 +47,12 @@ public class EventServiceImpl implements EventService {
         LocalDateTime currentTime = LocalDateTime.now();
         event.setCreatedAt(currentTime);
         if (eventDTO.getIsLimited()) {
-            if(eventDTO.getPrice()>0){
+            if (eventDTO.getPrice() > 0) {
                 event.setPrice(eventDTO.getPrice());
-            }
-            else{
+            } else {
                 throw new IllegalArgumentException("Укажите лимит больше 0");
             }
-            event.setCurrency(CurrencyType.valueOf(eventDTO.getCurrencyType()));
+            event.setCurrency(eventDTO.getCurrencyType());
         }
         event.setIsLimitSet(eventDTO.getIsLimited());
         User user = getUser(authentication);
@@ -64,27 +63,31 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> getAllEvents(Authentication authentication) {
+        Set<EventDto> eventDtoHashSet = new HashSet<>();
+
         User user = getUser(authentication);
-        List<CardDto> cardList = cardService.getCards(user.getId());
+
         List<EventDto> eventDtoList = new ArrayList<>();
+        List<CardDto> cardList = cardService.getCards(user);
+
         List<Event> myEvents = eventRepository.findEventsByOwner(user);
         List<EventDto> myEventDtos = transformToDto(myEvents);
+
         if (cardList != null) {
             for (CardDto cardDto : cardList) {
                 Event tempEvent = eventRepository.findById(cardDto.getEvent_id()).orElseThrow();
                 EventDto eventDto = new EventDto(tempEvent);
-                eventDtoList.add(eventDto);
+                eventDtoHashSet.add(eventDto);
             }
         }
 
         if (myEventDtos != null) {
-            for (EventDto eventDto : myEventDtos) {
-                eventDtoList.add(eventDto);
-            }
+            eventDtoHashSet.addAll(myEventDtos);
         }
-
+        eventDtoList.addAll(eventDtoHashSet);
         return eventDtoList;
     }
+
 
     @Override
     public CardDto createCard(CardDto cardDto, Authentication authentication) {

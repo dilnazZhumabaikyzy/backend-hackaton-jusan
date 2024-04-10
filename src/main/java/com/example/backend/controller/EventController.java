@@ -40,7 +40,7 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.shuffle(eventId, authentication));
     }
 
-    @GetMapping("/myreceiver/{eventId}")
+    @GetMapping("/my-receiver/{eventId}")
     public ResponseEntity<ShuffleDto> getMyReceiver(@PathVariable String eventId, Authentication authentication) {
         return ResponseEntity.ok().body(eventService.showMyReceiver(eventId, authentication));
     }
