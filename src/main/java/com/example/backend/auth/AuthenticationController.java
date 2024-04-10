@@ -25,13 +25,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
     ) {
-        AuthenticationResponse authenticationResponse = authenticationService.register(request);
-        if(Objects.equals(authenticationResponse.getToken(), "try again")){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new AuthenticationResponse("This email is already registered. Please use another email"));
-        }
-//        return ResponseEntity.ok(authenticationService.register(request));
-        return ResponseEntity.ok(authenticationResponse);
+        return ResponseEntity.ok(authenticationService.register(request));
     }
 
     @PostMapping("authenticate")

@@ -27,7 +27,10 @@ public class User implements UserDetails {
     private Long id;
     @Column(name = "full_name")
     private  String fullName;
+
+    @Column(unique = true)
     private String email;
+
     @JsonIgnore
     private String password;
     @OneToOne(fetch = FetchType.LAZY)
