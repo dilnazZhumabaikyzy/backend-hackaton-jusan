@@ -57,6 +57,7 @@ public class EventServiceImpl implements EventService {
         event.setIsLimitSet(eventDTO.getIsLimited());
         User user = getUser(authentication);
         event.setOwner(user);
+        event.setActive(true);
         eventRepository.save(event);
         return new EventDto(event);
     }
@@ -155,7 +156,6 @@ public class EventServiceImpl implements EventService {
             throw new InvalidEventException(eventId);
         }
         Event event = eventRepository.findEventById(eventId);
-
         ShuffleDto shuffleDto = new ShuffleDto();
 
         List<Card> cardList = event.getCards();
@@ -164,8 +164,6 @@ public class EventServiceImpl implements EventService {
         for (int i = 0; i < cardList.size(); i++) {
             Card currentCard = cardList.get(i);
             Card nextCard = cardList.get((i + 1) % cardList.size());
-
-
             SantaDto santaDto = new SantaDto(currentCard, nextCard);
 
             if (currentCard.getOwner() == user) {
@@ -176,16 +174,12 @@ public class EventServiceImpl implements EventService {
                         .build();
             }
 
-
             Santa santa = new Santa(event, currentCard.getOwner(), nextCard.getOwner());
             santaRepository.save(santa);
-
             event.setActive(false);
             eventRepository.save(event);
-
             mailService.sendSantaMessage(santaDto.getSantaEmail(), nextCard);
         }
-
 
         return shuffleDto;
     }
