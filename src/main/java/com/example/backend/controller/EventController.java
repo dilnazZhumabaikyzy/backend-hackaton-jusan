@@ -28,6 +28,11 @@ public class EventController {
         return ResponseEntity.ok().body(eventService.getAllEvents(authentication));
     }
 
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventDto> getEventInfo(@PathVariable String eventId) {
+        return ResponseEntity.ok().body(eventService.getEvent(eventId));
+    }
+
     @Transactional
     @PostMapping("/card")
     public ResponseEntity<CardDto> createCard(@RequestBody CardDto card, Authentication authentication) {

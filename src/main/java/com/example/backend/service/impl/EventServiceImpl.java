@@ -156,7 +156,6 @@ public class EventServiceImpl implements EventService {
         }
         Event event = eventRepository.findEventById(eventId);
 
-        List<SantaDto> santaDtoList = new ArrayList<>();
         ShuffleDto shuffleDto = new ShuffleDto();
 
         List<Card> cardList = event.getCards();
@@ -181,6 +180,8 @@ public class EventServiceImpl implements EventService {
             Santa santa = new Santa(event, currentCard.getOwner(), nextCard.getOwner());
             santaRepository.save(santa);
 
+            event.setActive(false);
+            eventRepository.save(event);
 
             mailService.sendSantaMessage(santaDto.getSantaEmail(), nextCard);
         }
@@ -216,5 +217,12 @@ public class EventServiceImpl implements EventService {
                 .build();
 
         return shuffleDto;
+    }
+
+    @Override
+    public EventDto getEvent(String eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(()-> new InvalidEventException(eventId));
+        EventDto eventDto = new EventDto(event);
+        return eventDto;
     }
 }

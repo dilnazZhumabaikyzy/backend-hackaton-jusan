@@ -16,6 +16,8 @@ public class EventDto {
     private Boolean isLimited;
     private int price;
     private CurrencyType currencyType;
+    private boolean active;
+    private int playersNumber;
 
     public EventDto(Event event) {
         this.name = event.getName();
@@ -27,5 +29,7 @@ public class EventDto {
         this.isLimited = event.getIsLimitSet();
         this.price = event.getPrice();
         this.currencyType = event.getCurrency();
+        this.active = event.isActive();
+        this.playersNumber = event.getCards().size();
     }
 }

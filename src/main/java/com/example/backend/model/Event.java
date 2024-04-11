@@ -29,7 +29,8 @@ public class Event {
     private int price;
     @Enumerated(EnumType.STRING)
     private CurrencyType currency;
-
+    @Column
+    private boolean active = true;
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
