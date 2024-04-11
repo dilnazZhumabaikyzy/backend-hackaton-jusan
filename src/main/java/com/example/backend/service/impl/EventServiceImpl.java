@@ -145,7 +145,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         Optional<User> userOptional = userRepository.findById(userId);
-        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
         return user;
     }
 
