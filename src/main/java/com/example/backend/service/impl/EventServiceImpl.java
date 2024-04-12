@@ -57,8 +57,12 @@ public class EventServiceImpl implements EventService {
         event.setIsLimitSet(eventDTO.getIsLimited());
         User user = getUser(authentication);
         event.setOwner(user);
+
         event.setActive(true);
         eventRepository.save(event);
+
+        System.out.println("EVENT CREATION" + event);
+
         return new EventDto(event);
     }
 
@@ -112,8 +116,12 @@ public class EventServiceImpl implements EventService {
         card.setGifts(giftList);
         cardList.add(card);
         event.setCards(cardList);
+
         cardRepository.save(card);
+
+        System.out.println("EVENT CARD CREATION: " + event.isActive());
         eventRepository.save(event);
+
         return new CardDto(card);
     }
 
