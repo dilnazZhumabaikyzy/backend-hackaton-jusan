@@ -30,8 +30,8 @@ public class UserController {
         return  ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
     @GetMapping("/email")
-    public ResponseEntity<UserDto> getUserInfoByEmail(@RequestBody RequestDto requestDto){
-        UserDto userDto = userService.getUserInfoByEmail(requestDto.getEmail());
+    public ResponseEntity<UserDto> getUserInfoByEmail(@RequestParam String email){
+        UserDto userDto = userService.getUserInfoByEmail(email);
         return  ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
 
