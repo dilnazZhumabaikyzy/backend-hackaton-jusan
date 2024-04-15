@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class EmailsRequestDto {
     private String[] emails;
-    private Long even_id;
+    private String event_id;
 }

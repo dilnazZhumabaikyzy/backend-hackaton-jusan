@@ -224,14 +224,20 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventDto getEvent(String eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(()-> new InvalidEventException(eventId));
-        EventDto eventDto = new EventDto(event);
+        List<Card> cardList = event.getCards();
+        List<String> emailList = new ArrayList<>();
+        for(Card card : cardList){
+            emailList.add(card.getOwner().getEmail());
+        }
+
+        EventDto eventDto = new EventDto(event, emailList);
         return eventDto;
     }
 
     @Override
     public void sendInvitations(EmailsRequestDto emailsRequestDto) {
          String[] emails = emailsRequestDto.getEmails();
-         String event_id = emailsRequestDto.getEven_id().toString();
+         String event_id = emailsRequestDto.getEvent_id();
 
          for(String email: emails){
             mailService.sendInvitationMessage(email, event_id);
