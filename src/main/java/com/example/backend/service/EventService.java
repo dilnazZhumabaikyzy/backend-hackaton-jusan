@@ -17,4 +17,6 @@ public interface EventService {
     ShuffleDto showMyReceiver(String eventId, Authentication authentication);
 
     EventDto getEvent(String eventId);
+
+    void sendInvitations(EmailsRequestDto emailsRequestDto);
 }

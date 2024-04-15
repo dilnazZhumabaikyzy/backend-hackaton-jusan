@@ -227,4 +227,14 @@ public class EventServiceImpl implements EventService {
         EventDto eventDto = new EventDto(event);
         return eventDto;
     }
+
+    @Override
+    public void sendInvitations(EmailsRequestDto emailsRequestDto) {
+         String[] emails = emailsRequestDto.getEmails();
+         String event_id = emailsRequestDto.getEven_id().toString();
+
+         for(String email: emails){
+            mailService.sendInvitationMessage(email, event_id);
+         }
+    }
 }

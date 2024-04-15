@@ -6,6 +6,12 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+
+import org.springframework.mail.javamail.MimeMessageHelper;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import java.util.List;
 
 @Service
@@ -49,5 +55,12 @@ public class MailServiceImpl {
         }
 
         return giftsString;
+    }
+
+    public void sendInvitationMessage(String email, String eventId) {
+        String emailBody = "Hello,\n\nYou're invited to participate in our Secret Santa game! Click the link below to join:\n\n"
+                + "https://secret-santa-jusan.vercel.app/game/" + eventId + "\n\n"
+                + "Looking forward to seeing you there!\n\nBest regards,\nThe Secret Santa Team";
+        sendSimpleMessage(email, "Invitation to Secret Santa Game", emailBody);
     }
 }

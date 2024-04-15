@@ -49,5 +49,9 @@ public class EventController {
     public ResponseEntity<ShuffleDto> getMyReceiver(@PathVariable String eventId, Authentication authentication) {
         return ResponseEntity.ok().body(eventService.showMyReceiver(eventId, authentication));
     }
-
+    @PostMapping("/send-invitations")
+    public ResponseEntity<Void> sendInvitations(@RequestBody EmailsRequestDto emailsRequestDto) {
+        eventService.sendInvitations(emailsRequestDto);
+        return ResponseEntity.ok().build();
+    }
 }
