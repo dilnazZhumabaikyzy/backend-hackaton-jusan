@@ -4,6 +4,7 @@ import com.example.backend.config.JwtService;
 import com.example.backend.exception.*;
 import com.example.backend.model.User;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.util.NicknameGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,7 @@ public class AuthenticationService {
         }
         var user = User.builder()
                 .email(request.getEmail())
+                .fullName(NicknameGenerator.generateNickname())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
