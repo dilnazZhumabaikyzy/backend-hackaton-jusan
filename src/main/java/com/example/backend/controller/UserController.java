@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 import com.example.backend.dto.RequestDto;
 import com.example.backend.dto.UserDto;
+import com.example.backend.service.UserService;
 import com.example.backend.service.impl.UserServiceImpl;
 import jakarta.transaction.Transactional;
 
@@ -17,15 +18,20 @@ import java.io.IOException;
 @RestController
 @RequestMapping("users")
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
     @Autowired
-    public UserController(UserServiceImpl userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping
     public ResponseEntity<UserDto> getUserInfo(Authentication authentication){
         UserDto userDto = userService.getUserInfo(authentication);
+        return  ResponseEntity.status(HttpStatus.OK).body(userDto);
+    }
+    @GetMapping("/email")
+    public ResponseEntity<UserDto> getUserInfoByEmail(@RequestBody RequestDto requestDto){
+        UserDto userDto = userService.getUserInfoByEmail(requestDto.getEmail());
         return  ResponseEntity.status(HttpStatus.OK).body(userDto);
     }
 

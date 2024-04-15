@@ -2,11 +2,13 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.RequestDto;
 import com.example.backend.dto.UserDto;
+import com.example.backend.exception.InvalidEmailException;
 import com.example.backend.model.ImageData;
 import com.example.backend.model.User;
 import com.example.backend.repository.ImageRepository;
 import com.example.backend.repository.UserRepository;
 
+import com.example.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final StorageServiceImpl storageService;
     private final PasswordEncoder passwordEncoder;
@@ -33,6 +35,7 @@ public class UserServiceImpl {
         this.imageRepository = imageRepository;
     }
 
+    @Override
     public List<User> getUsers(){
         return userRepository.findAll();
     }
@@ -41,6 +44,7 @@ public class UserServiceImpl {
         return new UserDto(user);
     }
 
+    @Override
     public void uploadUserImage(MultipartFile file, Authentication authentication) throws IOException {
         ImageData imageData = storageService.uploadImage(file);
 
@@ -52,13 +56,15 @@ public class UserServiceImpl {
         user.setImageData(imageData);
     }
 
+    @Override
     public byte[] downloadImage(Authentication authentication){
         User user = getUser(authentication);
         ImageData imageData = user.getImageData();
         return storageService.downloadImage(imageData.getId());
     }
 
-    private User getUser(Authentication authentication) {
+    @Override
+    public User getUser(Authentication authentication) {
         long userId = 0;
         if (authentication != null && authentication.isAuthenticated()) {
 
@@ -73,11 +79,13 @@ public class UserServiceImpl {
         return user;
     }
 
+    @Override
     public void delete(Authentication authentication) {
         User user = getUser(authentication);
         userRepository.delete(user);
     }
 
+    @Override
     public UserDto updateGeneralData(UserDto updateUser, Authentication authentication) {
         User user = getUser(authentication);
 
@@ -89,6 +97,7 @@ public class UserServiceImpl {
         return new UserDto(user);
     }
 
+    @Override
     public UserDto updatePassword(RequestDto requestDto, Authentication authentication) {
         User user = getUser(authentication);
 
@@ -96,5 +105,11 @@ public class UserServiceImpl {
         userRepository.save(user);
 
         return new UserDto(user);
+    }
+
+    @Override
+    public UserDto getUserInfoByEmail(String email) {
+        User user = userRepository.getUserByEmail(email).orElseThrow(() -> new InvalidEmailException(email));
+      return new UserDto(user);
     }
 }

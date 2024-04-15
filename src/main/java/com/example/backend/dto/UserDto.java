@@ -16,8 +16,6 @@ public class UserDto {
     private String email;
     private Long imageId;
 
-
-
     public UserDto(User user) {
         this.fullName = user.getFullName();
         this.email = user.getEmail();

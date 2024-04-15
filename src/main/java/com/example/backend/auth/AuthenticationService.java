@@ -58,7 +58,7 @@ public class AuthenticationService {
         if (!userRepository.existsByEmail(request.getEmail())) {
             throw new IncorrectPasswordException("Такой почты не существует");
         }
-        String currentPassword = userRepository.getUserByEmail(request.getEmail()).getPassword();
+        String currentPassword = userRepository.getUserByEmail(request.getEmail()).get().getPassword();
         if (!passwordEncoder.matches(request.getPassword(), currentPassword)) {
             throw new IncorrectPasswordException("Вы ввели неправильный пароль, попробуйте еще раз");
         }

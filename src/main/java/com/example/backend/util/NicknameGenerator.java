@@ -12,7 +12,7 @@ public class NicknameGenerator {
         Random rand = new Random();
         String adjective = adjectives[rand.nextInt(adjectives.length)];
         String noun = nouns[rand.nextInt(nouns.length)];
-        return adjective + noun;
+        return adjective + " " +  noun;
     }
     public static String[] generateNicknames(int numNicknames) {
         String[] nicknames = new String[numNicknames];
