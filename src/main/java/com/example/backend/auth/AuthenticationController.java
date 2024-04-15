@@ -2,6 +2,7 @@ package com.example.backend.auth;
 
 import com.example.backend.dto.RequestDto;
 import com.example.backend.service.impl.MailServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

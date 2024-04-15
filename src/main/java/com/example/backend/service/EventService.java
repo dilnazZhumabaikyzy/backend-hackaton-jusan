@@ -15,4 +15,6 @@ public interface EventService {
     ShuffleDto shuffle(String eventId, Authentication authentication);
 
     ShuffleDto showMyReceiver(String eventId, Authentication authentication);
+
+    EventDto getEvent(String eventId);
 }

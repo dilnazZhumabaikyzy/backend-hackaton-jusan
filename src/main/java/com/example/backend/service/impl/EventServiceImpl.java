@@ -57,7 +57,12 @@ public class EventServiceImpl implements EventService {
         event.setIsLimitSet(eventDTO.getIsLimited());
         User user = getUser(authentication);
         event.setOwner(user);
+
+        event.setActive(true);
         eventRepository.save(event);
+
+        System.out.println("EVENT CREATION" + event);
+
         return new EventDto(event);
     }
 
@@ -111,8 +116,12 @@ public class EventServiceImpl implements EventService {
         card.setGifts(giftList);
         cardList.add(card);
         event.setCards(cardList);
+
         cardRepository.save(card);
+
+        System.out.println("EVENT CARD CREATION: " + event.isActive());
         eventRepository.save(event);
+
         return new CardDto(card);
     }
 
@@ -145,7 +154,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         Optional<User> userOptional = userRepository.findById(userId);
-        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
         return user;
     }
 
@@ -155,8 +164,6 @@ public class EventServiceImpl implements EventService {
             throw new InvalidEventException(eventId);
         }
         Event event = eventRepository.findEventById(eventId);
-
-        List<SantaDto> santaDtoList = new ArrayList<>();
         ShuffleDto shuffleDto = new ShuffleDto();
 
         List<Card> cardList = event.getCards();
@@ -165,8 +172,6 @@ public class EventServiceImpl implements EventService {
         for (int i = 0; i < cardList.size(); i++) {
             Card currentCard = cardList.get(i);
             Card nextCard = cardList.get((i + 1) % cardList.size());
-
-
             SantaDto santaDto = new SantaDto(currentCard, nextCard);
 
             if (currentCard.getOwner() == user) {
@@ -177,14 +182,12 @@ public class EventServiceImpl implements EventService {
                         .build();
             }
 
-
             Santa santa = new Santa(event, currentCard.getOwner(), nextCard.getOwner());
             santaRepository.save(santa);
-
-
+            event.setActive(false);
+            eventRepository.save(event);
             mailService.sendSantaMessage(santaDto.getSantaEmail(), nextCard);
         }
-
 
         return shuffleDto;
     }
@@ -216,5 +219,12 @@ public class EventServiceImpl implements EventService {
                 .build();
 
         return shuffleDto;
+    }
+
+    @Override
+    public EventDto getEvent(String eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(()-> new InvalidEventException(eventId));
+        EventDto eventDto = new EventDto(event);
+        return eventDto;
     }
 }

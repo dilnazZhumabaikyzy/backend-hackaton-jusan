@@ -38,7 +38,7 @@ public class UserController {
     @Transactional
     @PostMapping("/image")
     public ResponseEntity<Void> uploadImage(@RequestParam("image") MultipartFile file, Authentication authentication) throws IOException {
-       userService.uploadUserImage(file ,authentication);
+         userService.uploadUserImage(file ,authentication);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
     @Transactional

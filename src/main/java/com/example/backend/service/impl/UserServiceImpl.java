@@ -4,9 +4,9 @@ import com.example.backend.dto.RequestDto;
 import com.example.backend.dto.UserDto;
 import com.example.backend.model.ImageData;
 import com.example.backend.model.User;
+import com.example.backend.repository.ImageRepository;
 import com.example.backend.repository.UserRepository;
 
-import com.example.backend.service.impl.StorageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,12 +23,14 @@ public class UserServiceImpl {
     private final UserRepository userRepository;
     private final StorageServiceImpl storageService;
     private final PasswordEncoder passwordEncoder;
+    private final ImageRepository imageRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, StorageServiceImpl storageService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, StorageServiceImpl storageService, PasswordEncoder passwordEncoder, ImageRepository imageRepository) {
         this.userRepository = userRepository;
         this.storageService = storageService;
         this.passwordEncoder = passwordEncoder;
+        this.imageRepository = imageRepository;
     }
 
     public List<User> getUsers(){
@@ -43,6 +45,10 @@ public class UserServiceImpl {
         ImageData imageData = storageService.uploadImage(file);
 
         User user = getUser(authentication);
+        if(user.getImageData() != null){
+            ImageData usersOldImage = imageRepository.findById(user.getImageData().getId()).orElseThrow();
+            imageRepository.delete(usersOldImage);
+        }
         user.setImageData(imageData);
     }
 
@@ -63,7 +69,7 @@ public class UserServiceImpl {
             }
         }
         Optional<User> userOptional = userRepository.findById(userId);
-        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
         return user;
     }
 
