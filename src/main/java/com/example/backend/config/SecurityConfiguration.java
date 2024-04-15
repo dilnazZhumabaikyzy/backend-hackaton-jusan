@@ -64,7 +64,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         String[] allowedOrigins = {
                 "http://localhost:5173",
-                "https://jusan-hackathon-r26697sar-samekeekzs-projects.vercel.app"
+                "https://secret-santa-jusan.vercel.app"
         };
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
