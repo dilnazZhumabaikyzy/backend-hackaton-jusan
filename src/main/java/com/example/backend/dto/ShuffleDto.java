@@ -15,4 +15,5 @@ public class ShuffleDto {
     private String receiverEmail;
     private String receiverName;
     private List<GiftDto> receiverGiftList;
+    private boolean giftSent;
 }

@@ -224,6 +224,7 @@ public class EventServiceImpl implements EventService {
                 .receiverGiftList(giftDtoList)
                 .build();
 
+        shuffleDto.setGiftSent(card.isSent());
         return shuffleDto;
     }
 
