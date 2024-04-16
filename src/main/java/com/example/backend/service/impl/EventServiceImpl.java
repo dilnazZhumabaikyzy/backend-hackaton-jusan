@@ -2,6 +2,7 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.*;
 import com.example.backend.exception.DuplicateKeyException;
+import com.example.backend.exception.InvalidEmailException;
 import com.example.backend.exception.InvalidEventException;
 import com.example.backend.model.*;
 import com.example.backend.repository.*;
@@ -10,6 +11,8 @@ import com.example.backend.service.EventService;
 import com.example.backend.util.AuthenticationUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class EventServiceImpl implements EventService {
     private final SantaRepository santaRepository;
     private final MailServiceImpl mailService;
     private int count = 0;
+    private Logger logger;
 
     @Override
     public EventDto createEvent(EventDto eventDTO, Authentication authentication) {
@@ -159,11 +163,16 @@ public class EventServiceImpl implements EventService {
     }
 
     public ShuffleDto shuffle(String eventId, Authentication authentication) {
+        Event event = eventRepository.findEventById(eventId);
+        if(!event.isActive()){
+            throw new InvalidEventException();
+        }
         User user = getUser(authentication);
         if (!eventRepository.existsById(eventId)) {
             throw new InvalidEventException(eventId);
         }
-        Event event = eventRepository.findEventById(eventId);
+
+
         ShuffleDto shuffleDto = new ShuffleDto();
 
         List<Card> cardList = event.getCards();
@@ -242,5 +251,17 @@ public class EventServiceImpl implements EventService {
          for(String email: emails){
             mailService.sendInvitationMessage(email, event_id);
          }
+    }
+
+    @Override
+    public void updateCardDetail(String event_id, ShuffleDto dto) {
+        Event event = eventRepository.findById(event_id).orElseThrow(()-> new InvalidEventException(event_id));
+        User user = userRepository.findByEmail(dto.getReceiverEmail())
+                .orElseThrow(() -> new InvalidEmailException(dto.getReceiverEmail()));
+        Card card = cardRepository.getCardByOwnerAndEvent(user, event);
+        card.setSent(true);
+        cardRepository.save(card);
+        mailService.sendGiftSentMessage(dto.getReceiverEmail());
+
     }
 }

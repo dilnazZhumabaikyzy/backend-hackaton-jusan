@@ -19,4 +19,5 @@ public interface EventService {
     EventDto getEvent(String eventId);
 
     void sendInvitations(EmailsRequestDto emailsRequestDto);
+    void updateCardDetail(String event_id, ShuffleDto dto);
 }

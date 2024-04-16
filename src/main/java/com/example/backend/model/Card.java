@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,4 +30,6 @@ public class Card {
 
     @OneToMany(mappedBy = "card")
     private List<Gift> gifts = new ArrayList<>();
+
+    private boolean isSent;
 }

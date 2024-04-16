@@ -1,7 +1,6 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.*;
-import com.example.backend.model.Event;
 import com.example.backend.service.EventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -52,6 +51,13 @@ public class EventController {
     @PostMapping("/send-invitations")
     public ResponseEntity<Void> sendInvitations(@RequestBody EmailsRequestDto emailsRequestDto) {
         eventService.sendInvitations(emailsRequestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/my-receiver/{eventId}")
+    public ResponseEntity<Void> giftSent(@PathVariable String eventId,
+                                         @RequestBody ShuffleDto dto){
+        eventService.updateCardDetail(eventId, dto);
         return ResponseEntity.ok().build();
     }
 }

@@ -61,4 +61,10 @@ public class MailServiceImpl {
                 + "Looking forward to seeing you there!\n\nBest regards,\nThe Secret Santa Team";
         sendSimpleMessage(email, "Invitation to Secret Santa Game", emailBody);
     }
+
+    public void sendGiftSentMessage(String email) {
+        String emailBody = "Hello,\n\nYour santa has bought gift for you! Don't worry about your gift, " +
+                "You will not be left without a gift :)";
+        sendSimpleMessage(email, "Invitation to Secret Santa Game", emailBody);
+    }
 }
