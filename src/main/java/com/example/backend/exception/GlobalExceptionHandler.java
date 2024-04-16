@@ -51,4 +51,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleInvalidEmailFormatException(InvalidEmailFormatException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(ex.getMessage()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponse> handleException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(ex.getMessage()));
+    }
 }

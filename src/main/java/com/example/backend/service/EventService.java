@@ -20,4 +20,6 @@ public interface EventService {
 
     void sendInvitations(EmailsRequestDto emailsRequestDto);
     void updateCardDetail(String event_id, ShuffleDto dto);
+
+    void deleteCard(String event_id, RequestDto dto, Authentication authentication) throws Exception;
 }

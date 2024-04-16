@@ -28,7 +28,7 @@ public class Card {
     @JoinColumn(name = "event_id")
     private Event event;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL)
     private List<Gift> gifts = new ArrayList<>();
 
     private boolean isSent;

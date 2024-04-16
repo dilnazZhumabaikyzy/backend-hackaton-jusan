@@ -65,8 +65,6 @@ public class EventServiceImpl implements EventService {
         event.setActive(true);
         eventRepository.save(event);
 
-        System.out.println("EVENT CREATION" + event);
-
         return new EventDto(event);
     }
 
@@ -123,7 +121,6 @@ public class EventServiceImpl implements EventService {
 
         cardRepository.save(card);
 
-        System.out.println("EVENT CARD CREATION: " + event.isActive());
         eventRepository.save(event);
 
         return new CardDto(card);
@@ -164,7 +161,7 @@ public class EventServiceImpl implements EventService {
 
     public ShuffleDto shuffle(String eventId, Authentication authentication) {
         Event event = eventRepository.findEventById(eventId);
-        if(!event.isActive()){
+        if (!event.isActive()) {
             throw new InvalidEventException();
         }
         User user = getUser(authentication);
@@ -232,10 +229,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDto getEvent(String eventId) {
-        Event event = eventRepository.findById(eventId).orElseThrow(()-> new InvalidEventException(eventId));
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new InvalidEventException(eventId));
         List<Card> cardList = event.getCards();
         List<String> emailList = new ArrayList<>();
-        for(Card card : cardList){
+        for (Card card : cardList) {
             emailList.add(card.getOwner().getEmail());
         }
 
@@ -245,17 +242,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void sendInvitations(EmailsRequestDto emailsRequestDto) {
-         String[] emails = emailsRequestDto.getEmails();
-         String event_id = emailsRequestDto.getEvent_id();
+        String[] emails = emailsRequestDto.getEmails();
+        String event_id = emailsRequestDto.getEvent_id();
 
-         for(String email: emails){
+        for (String email : emails) {
             mailService.sendInvitationMessage(email, event_id);
-         }
+        }
     }
 
     @Override
     public void updateCardDetail(String event_id, ShuffleDto dto) {
-        Event event = eventRepository.findById(event_id).orElseThrow(()-> new InvalidEventException(event_id));
+        Event event = eventRepository.findById(event_id).orElseThrow(() -> new InvalidEventException(event_id));
         User user = userRepository.findByEmail(dto.getReceiverEmail())
                 .orElseThrow(() -> new InvalidEmailException(dto.getReceiverEmail()));
         Card card = cardRepository.getCardByOwnerAndEvent(user, event);
@@ -263,5 +260,18 @@ public class EventServiceImpl implements EventService {
         cardRepository.save(card);
         mailService.sendGiftSentMessage(dto.getReceiverEmail());
 
+    }
+
+    @Override
+    public void deleteCard(String event_id, RequestDto dto, Authentication authentication) throws Exception {
+        User current_user = getUser(authentication);
+        Event event = eventRepository.findById(event_id).orElseThrow(() -> new InvalidEventException(event_id));
+        if (event.getOwner() != current_user) {
+            throw new Exception("Только владелец игры может удалять участников");
+        }
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new InvalidEmailException(dto.getEmail()));
+        Card card = cardRepository.getCardByOwnerAndEvent(user, event);
+        cardRepository.delete(card);
     }
 }
