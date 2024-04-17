@@ -39,13 +39,16 @@ public class User implements UserDetails {
     @JoinColumn(name = "image_id")
     private ImageData imageData;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Event> event;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     List<Card> cards = new ArrayList<>();
 
-    @OneToMany(mappedBy = "santaUser")
+    @OneToMany(mappedBy = "santaUser", cascade = CascadeType.ALL)
     List<Santa> santas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "receiverUser")
+    @OneToMany(mappedBy = "receiverUser", cascade = CascadeType.ALL)
     List<Santa> receivers = new ArrayList<>();
 
     @Override

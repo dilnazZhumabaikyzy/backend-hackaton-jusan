@@ -213,6 +213,9 @@ public class EventServiceImpl implements EventService {
         }
         Event event = eventRepository.findEventById(eventId);
         Santa santa = santaRepository.getSantaBySantaUserAndEvent_Id(user, event.getId());
+        if(santa == null){
+            throw new NoSuchElementException("У вас нету получателя");
+        }
 
         Card card = cardRepository.getCardByOwnerAndEvent(santa.getReceiverUser(), event);
         List<GiftDto> giftDtoList = transformToGiftDto(card.getGifts());
